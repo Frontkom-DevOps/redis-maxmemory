@@ -27,6 +27,7 @@ jobs:
         with:
           repository: wodby/redis
           path: wodby-redis
+          fetch-tags: true
 
       - name: Fetch latest tags
         id: wodby_tags
