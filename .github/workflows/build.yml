@@ -14,6 +14,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   # Filter tags by major version, ref: https://github.com/wodby/redis
   WODBY_MAJOR_VERSION: 4
+  REDIS_MAJOR_VERSION: 7
 
 jobs:
   build:
@@ -29,48 +30,45 @@ jobs:
         with:
           repository: wodby/redis
           path: wodby-redis
-          fetch-tags: true
 
       - name: Fetch latest tags
         id: wodby_tags
         run: |
           cd wodby-redis ||  exit 1
           git fetch --tags
-          git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*'
-
           echo >> $GITHUB_OUTPUT "latest=$(git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*' | tail -n1)"
 
-      - name: Debug outputs
-        run: |
-          echo "${{ steps.wodby_tags.outputs.latest }}"
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v3
+      - name: Login to registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Login to registry
-      #   if: github.event_name != 'pull_request'
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@v5
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      # - name: Build and push
-      #   id: docker_build
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     push: ${{ github.event_name != 'pull_request' }}
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
-      #     cache-from: type=gha
-      #     cache-to: type=gha,mode=max
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v5
+        env:
+          WODBY_CONTAINER_TAG: ${{ steps.wodby_tags.outputs.latest }}
+        with:
+          context: .
+          build-args: |
+            WODBY_TAG=${{ env.REDIS_MAJOR_VERSION }}-${{ env.WODBY_CONTAINER_TAG }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
