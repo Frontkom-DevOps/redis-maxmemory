@@ -1,2 +1,3 @@
-# redis-maxmemory
-Simple redis container which automatically allocates all* available memory
+# Redis Max-Memory Percentage
+
+This simple container wraps
