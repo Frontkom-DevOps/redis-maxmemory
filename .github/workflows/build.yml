@@ -35,6 +35,7 @@ jobs:
         id: wodby_tags
         run: |
           cd wodby-redis ||  exit 1
+          git fetch --tags
           git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*'
 
           echo >> $GITHUB_OUTPUT "latest=$(git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*' | tail -n1)"
