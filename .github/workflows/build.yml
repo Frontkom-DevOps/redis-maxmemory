@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     tags: [ 'v*' ]
-    branches: [ '1.x', 'init' ]
+    branches: [ '1.x' ]
   pull_request:
     branches: [ '1.x' ]
   schedule:
