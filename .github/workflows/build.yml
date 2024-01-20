@@ -12,6 +12,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Filter tags by major version, ref: https://github.com/wodby/redis
+  WODBY_MAJOR_VERSION: 4
 
 jobs:
   build:
@@ -33,9 +35,9 @@ jobs:
         id: wodby_tags
         run: |
           cd wodby-redis ||  exit 1
-          git tag --sort=authordate --list
+          git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*'
 
-          echo "latest=$(git tag --sort=authordate --list | tail -n1)" >> $GITHUB_OUTPUT
+          echo >> $GITHUB_OUTPUT "latest=$(git tag --sort=authordate --list '${{ env.WODBY_MAJOR_VERSION }}.*' | tail -n1)"
 
       - name: Debug outputs
         run: |
