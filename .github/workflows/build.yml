@@ -31,6 +31,7 @@ jobs:
       - name: Fetch latest tags
         id: wodby_tags
         run: |
+          cd wodby-redis ||  exit 1
           git tag --sort=authordate --list
 
           echo "latest=$(git tag --sort=authordate --list | tail -n1)" >> $GITHUB_OUTPUT
