@@ -31,9 +31,9 @@ jobs:
       - name: Fetch latest tags
         id: wodby_tags
         run: |
-          git describe --tags --sort=-creatordate
+          git tag --sort=authordate --list
 
-          echo "latest=$(git describe --tags --sort=-creatordate | head -n1)" >> $GITHUB_OUTPUT
+          echo "latest=$(git tag --sort=authordate --list | tail -n1)" >> $GITHUB_OUTPUT
 
       - name: Debug outputs
         run: |
