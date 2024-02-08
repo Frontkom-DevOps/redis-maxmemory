@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-if [[ -n "${DEBUG}" ]]; then
+if [[ -n "${DEBUG:-}" ]]; then
     set -x
 fi
 
